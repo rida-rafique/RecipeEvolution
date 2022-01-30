@@ -29,3 +29,26 @@ insert into Group10.Nutrition(id,calories,proteinContent,fatContent,carbohyderat
  Union ALL
  (select idid,calories,proteinContent,fatContent,carbohydrateContent,fiberContent,sugarContent
  from `VWR INTERNAL Umamigirl recipeLink` where idid in (select id from temp2));
+
+ALTER TABLE `VWR INTERNAL Vegetarianventures ingredients` ADD `groupName` TEXT CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `segment`;
+Update Vegetarianventures.`VWR INTERNAL Vegetarianventures ingredients` t1
+inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeIngredients` c
+on c.row_id=t1.parent_row_id 
+set t1.groupName=c.groupName;
+
+Insert into Group10.Ingredients(id,source_ind,groupName,ingredient)(select s.idid, i.source_index,i.groupName,i.recipeIngredient
+FROM Vegetarianventures.`VWR INTERNAL Vegetarianventures ingredients`  i  
+inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeIngredients` r on i.parent_row_id = r.row_id
+inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeList` s on s.row_id=r.parent_row_id);
+
+
+ALTER TABLE `VWR INTERNAL Vegetarianventures howToStep` ADD `section` TEXT CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `segment`;
+Update Vegetarianventures.`VWR INTERNAL Vegetarianventures howToStep` c
+inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeInstructions` t1
+on t1.row_id=c.parent_row_id 
+set c.section=t1.howToSection;
+
+Insert into Group10.Instructions(id,source_ind,section,instruction)(select s.idid, i.source_index,i.section,i.recipeInstruction
+FROM Vegetarianventures.`VWR INTERNAL Vegetarianventures howToStep`  i  
+inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeInstructions` r on i.parent_row_id = r.row_id
+inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeList` s on s.row_id=r.parent_row_id);
