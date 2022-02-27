@@ -52,3 +52,36 @@ Insert into Group10.Instructions(id,source_ind,section,instruction)(select s.idi
 FROM Vegetarianventures.`VWR INTERNAL Vegetarianventures howToStep`  i  
 inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeInstructions` r on i.parent_row_id = r.row_id
 inner join Vegetarianventures.`VWR INTERNAL Vegetarianventures recipeList` s on s.row_id=r.parent_row_id);
+
+Next Week
+
+QUERIES OF INGREDIENT TABLE
+
+QTY COLUMN
+This query will separate the quantity from the ingredient string. E.g.  2 Liter orange juice we will get 2 from this query 
+UPDATE ingredients SET QTY=REGEXP_SUBSTR(ingredient,'^[0-9/. ]+') WHERE ingredient REGEXP '^[0-9/. ]+(.*)$'
+
+UNIT COLUMN
+This query will separate the unit from ingredient string. E.g.  2 Liter orange juice we will get liter from this query
+UPDATE ingredients SET UNIT= REGEXP_SUBSTR(	SUBSTRING(ingredient, POSITION(QTY in ingredient)+LENGTH(QTY))	,	'(?(?=.*[\,\:])[^A-Za-z]*|[A-Za-z]*)'	) WHERE QTY IS NOT NULL;
+
+ING COLUMN
+This query will separate all the ingredients from ingredient string. E.g.  2 Liter orange juice we will get orange juice from this query
+UPDATE ingredients SET Ing= REGEXP_SUBSTR(	SUBSTRING(ingredient, POSITION(Unit in ingredient)+LENGTH(Unit)) , '(?(?=.*[\,\:])(^(.+?),|\\s*:.*)|^[^ ]* (.*))' ) WHERE Unit IS NOT NULL;
+
+This query will remove the round brackets and the string written in it. E.g., 1 ounce vodka (optional) in this string (optional) will be removed.
+UPDATE ingredients SET Ing= REGEXP_SUBSTR(Ing , '\([^()]*\)' );
+
+ACTION COLUMN
+This query will extract all actions. E.g., Garnish: Orange wheel in this string Garnish: will be extracted 
+UPDATE ingredients SET action=REGEXP_SUBSTR(ingredient,'(^(.+?):|\\s*,.*)')
+
+PROCESS COLUMN
+This query will extract all the processes. e.g., Cracked pepper from this string Cracked will be extracted 
+UPDATE ingredients SET process=REGEXP_SUBSTR(ingredient,'[A-Za-z]+ed\ +');
+
+PROCESSED ING COLUMN
+This query will remove all processes from the Ing column e.g., Cracked pepper from this string we will get pepper
+UPDATE ingredients SET P_Ing=REGEXP_SUBSTR (Ing,'(? (?= . *[A-Za-z]+ed\ +)((?<=ed).*[^ed]+)|[^\n]+)');
+UPDATE ingredients SET P_Ing=REGEXP_SUBSTR (P_Ing , '(?(?=^(ed))\s(.*)|[^\n]+)' );
+UPDATE ingredients SET P_Ing=REGEXP_SUBSTR (P_Ing , '(?(?=^(d))\s(.*)|[^\n]+)' );
